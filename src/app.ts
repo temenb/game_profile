@@ -1,11 +1,15 @@
-import express from 'express';
-import profileRoutes from './routes/profile.routes';
+import dotenv from 'dotenv';
+import { ProfileService } from './generated/profile';
+import * as grpc from '@grpc/grpc-js';
+import * as profileHandler from "./grpc/handlers/profile.handler";
 
-const app = express();
-app.use(express.json());
+dotenv.config();
 
-app.use('/me', profileRoutes);
+const server = new grpc.Server();
 
-app.use((req, res) => res.status(404).send('Not Found'));
+server.addService(ProfileServiceService, {
+    Upsert: profileHandler.Upsert,
+    view: profileHandler.view,
+});
 
-export default app;
+export default server;

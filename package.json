@@ -7,7 +7,9 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "prisma": "prisma",
-    "test": "jest"
+    "prisma:migrate": "prisma migrate dev --name init",
+    "test": "jest",
+    "proto:generate": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=src/generated --ts_proto_opt=outputServices=grpc-js,useExactTypes=false,esModuleInterop=true --proto_path=./proto ./proto/*.proto"
   },
   "dependencies": {
     "@prisma/client": "^6.12.0",
@@ -24,6 +26,7 @@
     "supertest": "^7.1.3",
     "ts-jest": "^29.4.0",
     "ts-node-dev": "^2.0.0",
+    "ts-proto": "^2.7.7",
     "typescript": "^5.4.5"
   }
 }
