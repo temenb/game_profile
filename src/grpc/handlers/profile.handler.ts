@@ -3,9 +3,9 @@ import * as ProfileGrpc from '../../generated/profile';
 import * as ProfileService from '../../services/profile.service';
 import {Request, Response} from "express";
 
-export const Upsert = async (
+export const upsert = async (
     call: grpc.ServerUnaryCall<ProfileGrpc.UpsertRequest, ProfileGrpc.ProfileResponse>,
-    callback: grpc.sendUnaryData<PrfileGrpc.ProfileResponse>
+    callback: grpc.sendUnaryData<ProfileGrpc.ProfileResponse>
 ) => {
     const { userId } = call.request;
 
@@ -14,8 +14,8 @@ export const Upsert = async (
 
 
         callback(null, {
-            profile_id: result.id,
-            user_id: result.user_id,
+            profileId: result.id,
+            userId: result.userId,
             nickname: result.nickname,
             level: result.level,
             rating: result.rating,
@@ -30,19 +30,22 @@ export const Upsert = async (
     }
 };
 
-export const View = async (
+export const getProfile = async (
     call: grpc.ServerUnaryCall<ProfileGrpc.ViewRequest, ProfileGrpc.ProfileResponse>,
-    callback: grpc.sendUnaryData<PrfileGrpc.ProfileResponse>
+    callback: grpc.sendUnaryData<ProfileGrpc.ProfileResponse>
 ) => {
     const { userId } = call.request;
 
     try {
-        const result = await ProfileService.view(userId);
-
+        const result = await ProfileService.getProfile(userId);
+        
+        if (!result) {
+            throw new Error("Expected result, but got null");
+        }
 
         callback(null, {
-            profile_id: result.id,
-            user_id: result.user_id,
+            profileId: result.id,
+            userId: result.userId,
             nickname: result.nickname,
             level: result.level,
             rating: result.rating,

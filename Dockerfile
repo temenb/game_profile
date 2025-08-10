@@ -1,31 +1,30 @@
 FROM node:22
 
-# Рабочая директория
 WORKDIR /usr/src/app
 
-# Копируем только package*.json для npm install с кэшированием
 COPY --chown=node:node package*.json ./
+COPY --chown=node:node jest.config.js ./
+COPY --chown=node:node tsconfig.json ./
+COPY --chown=node:node src ./src
+COPY --chown=node:node prisma ./prisma
+COPY --chown=node:node __tests__ ./__tests__
 
-# Устанавливаем зависимости от root, чтобы избежать проблем с правами
 USER root
 
-RUN npm install
+RUN npm ci
+#
+RUN chown -R node:node /usr/src/app/node_modules\
+    && mkdir -p /usr/src/app/dist && chown -R node:node /usr/src/app/dist
 
-COPY prisma ./prisma
+USER node
+
 RUN npx prisma generate
 
-# Копируем остальные файлы
-COPY --chown=node:node . .
-
-# Создаём директорию dist с нужными правами
-RUN mkdir -p /usr/src/app/dist && chown -R node:node /usr/src/app/dist
-
-# Билдим проект от пользователя node
-USER node
 RUN npm run build
 
-# Открываем порт
 EXPOSE 3000
 
-# Запуск
 CMD ["npm", "start"]
+
+HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1

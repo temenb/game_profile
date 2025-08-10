@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+
 const prisma = new PrismaClient();
 
 export function findProfile(userId: string) {
@@ -9,11 +10,12 @@ export function upsert(userId: string) {
     return prisma.profile.upsert({
         where: { userId },
         create: { userId },
+        update: {},
     });
 }
 
-export function upsert(userId: string, nickname: string) {
+export function getProfile(userId: string) {
     return prisma.profile.findUnique({
-        where: { user_id: userId },
+        where: { userId: userId },
     });
 }

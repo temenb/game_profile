@@ -30,8 +30,8 @@ export interface ViewRequest {
 }
 
 export interface ProfileResponse {
-  profileId: number;
-  userId: number;
+  profileId: string;
+  userId: string;
   nickname: string;
   level: number;
   rating: number;
@@ -155,16 +155,16 @@ export const ViewRequest: MessageFns<ViewRequest> = {
 };
 
 function createBaseProfileResponse(): ProfileResponse {
-  return { profileId: 0, userId: 0, nickname: "", level: 0, rating: 0, experience: 0 };
+  return { profileId: "", userId: "", nickname: "", level: 0, rating: 0, experience: 0 };
 }
 
 export const ProfileResponse: MessageFns<ProfileResponse> = {
   encode(message: ProfileResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.profileId !== 0) {
-      writer.uint32(8).int64(message.profileId);
+    if (message.profileId !== "") {
+      writer.uint32(10).string(message.profileId);
     }
-    if (message.userId !== 0) {
-      writer.uint32(16).int64(message.userId);
+    if (message.userId !== "") {
+      writer.uint32(18).string(message.userId);
     }
     if (message.nickname !== "") {
       writer.uint32(26).string(message.nickname);
@@ -189,19 +189,19 @@ export const ProfileResponse: MessageFns<ProfileResponse> = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
-          if (tag !== 8) {
+          if (tag !== 10) {
             break;
           }
 
-          message.profileId = longToNumber(reader.int64());
+          message.profileId = reader.string();
           continue;
         }
         case 2: {
-          if (tag !== 16) {
+          if (tag !== 18) {
             break;
           }
 
-          message.userId = longToNumber(reader.int64());
+          message.userId = reader.string();
           continue;
         }
         case 3: {
@@ -247,8 +247,8 @@ export const ProfileResponse: MessageFns<ProfileResponse> = {
 
   fromJSON(object: any): ProfileResponse {
     return {
-      profileId: isSet(object.profileId) ? globalThis.Number(object.profileId) : 0,
-      userId: isSet(object.userId) ? globalThis.Number(object.userId) : 0,
+      profileId: isSet(object.profileId) ? globalThis.String(object.profileId) : "",
+      userId: isSet(object.userId) ? globalThis.String(object.userId) : "",
       nickname: isSet(object.nickname) ? globalThis.String(object.nickname) : "",
       level: isSet(object.level) ? globalThis.Number(object.level) : 0,
       rating: isSet(object.rating) ? globalThis.Number(object.rating) : 0,
@@ -258,11 +258,11 @@ export const ProfileResponse: MessageFns<ProfileResponse> = {
 
   toJSON(message: ProfileResponse): unknown {
     const obj: any = {};
-    if (message.profileId !== 0) {
-      obj.profileId = Math.round(message.profileId);
+    if (message.profileId !== "") {
+      obj.profileId = message.profileId;
     }
-    if (message.userId !== 0) {
-      obj.userId = Math.round(message.userId);
+    if (message.userId !== "") {
+      obj.userId = message.userId;
     }
     if (message.nickname !== "") {
       obj.nickname = message.nickname;
@@ -284,8 +284,8 @@ export const ProfileResponse: MessageFns<ProfileResponse> = {
   },
   fromPartial(object: DeepPartial<ProfileResponse>): ProfileResponse {
     const message = createBaseProfileResponse();
-    message.profileId = object.profileId ?? 0;
-    message.userId = object.userId ?? 0;
+    message.profileId = object.profileId ?? "";
+    message.userId = object.userId ?? "";
     message.nickname = object.nickname ?? "";
     message.level = object.level ?? 0;
     message.rating = object.rating ?? 0;
@@ -294,10 +294,10 @@ export const ProfileResponse: MessageFns<ProfileResponse> = {
   },
 };
 
-export type ProfileServiceService = typeof ProfileServiceService;
-export const ProfileServiceService = {
+export type ProfileService = typeof ProfileService;
+export const ProfileService = {
   upsert: {
-    path: "/profile.ProfileService/Upsert",
+    path: "/profile.Profile/Upsert",
     requestStream: false,
     responseStream: false,
     requestSerialize: (value: UpsertRequest): Buffer => Buffer.from(UpsertRequest.encode(value).finish()),
@@ -306,7 +306,7 @@ export const ProfileServiceService = {
     responseDeserialize: (value: Buffer): ProfileResponse => ProfileResponse.decode(value),
   },
   view: {
-    path: "/profile.ProfileService/View",
+    path: "/profile.Profile/View",
     requestStream: false,
     responseStream: false,
     requestSerialize: (value: ViewRequest): Buffer => Buffer.from(ViewRequest.encode(value).finish()),
@@ -316,12 +316,12 @@ export const ProfileServiceService = {
   },
 } as const;
 
-export interface ProfileServiceServer extends UntypedServiceImplementation {
+export interface ProfileServer extends UntypedServiceImplementation {
   upsert: handleUnaryCall<UpsertRequest, ProfileResponse>;
   view: handleUnaryCall<ViewRequest, ProfileResponse>;
 }
 
-export interface ProfileServiceClient extends Client {
+export interface ProfileClient extends Client {
   upsert(
     request: UpsertRequest,
     callback: (error: ServiceError | null, response: ProfileResponse) => void,
@@ -354,12 +354,9 @@ export interface ProfileServiceClient extends Client {
   ): ClientUnaryCall;
 }
 
-export const ProfileServiceClient = makeGenericClientConstructor(
-  ProfileServiceService,
-  "profile.ProfileService",
-) as unknown as {
-  new (address: string, credentials: ChannelCredentials, options?: Partial<ClientOptions>): ProfileServiceClient;
-  service: typeof ProfileServiceService;
+export const ProfileClient = makeGenericClientConstructor(ProfileService, "profile.Profile") as unknown as {
+  new (address: string, credentials: ChannelCredentials, options?: Partial<ClientOptions>): ProfileClient;
+  service: typeof ProfileService;
   serviceName: string;
 };
 

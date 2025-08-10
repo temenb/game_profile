@@ -11,9 +11,9 @@ datasource db {
 model Profile {
   id         String   @id @default(uuid())
   userId     String   @unique
-  nickname   String
+  nickname   String   @default("guest")
   level      Int      @default(1)
-  rating    Int      @default(1000)
+  rating     Int      @default(1000)
   experience Int      @default(0)
 
   achievements UserAchievement[]

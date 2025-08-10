@@ -1,6 +1,8 @@
-import app from './app';
-import { config } from './config/config';
+import server from './app';
+import * as grpc from '@grpc/grpc-js';
 
-app.listen(config.port, () => {
-    console.log(`🚀 Profile service is running on port ${config.port}`);
+const PORT = process.env.PORT || 3000;
+
+server.bindAsync(`0.0.0.0:${PORT}`, grpc.ServerCredentials.createInsecure(), () => {
+    console.log(`🚀 gRPC server running on port ${PORT}`);
 });
