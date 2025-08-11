@@ -7,7 +7,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "prisma": "prisma",
-    "prisma:migrate": "prisma migrate dev --name init",
+    "prisma:migrate": "npx prisma migrate dev --name init",
     "test": "jest"
   },
   "devDependencies": {
