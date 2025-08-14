@@ -7,7 +7,6 @@
     "stage": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "prisma": "prisma",
     "prisma:migrate": "npx prisma migrate dev --name init",
     "test": "jest"
   },
