@@ -1,12 +1,13 @@
 import amqp from 'amqplib';
 import { PrismaClient } from '@prisma/client';
+import config from '../config/config';
 
 const prisma = new PrismaClient();
 
 export async function consumeUserCreated() {
-    const conn = await amqp.connect(process.env.RABBITMQ_URL!);
+    const conn = await amqp.connect(config.rabbitmqUrl);
     const channel = await conn.createChannel();
-    await channel.assertQueue(process.env.RABBITMQ_QUEUE_USER_CREATED!, { durable: true });
+    await channel.assertQueue(config.rabbitmqQueueUserCreated, { durable: true });
 
     channel.consume('user.created', async (msg) => {
         if (!msg) return;
