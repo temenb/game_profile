@@ -8,8 +8,12 @@ dotenv.config();
 const server = new grpc.Server();
 
 server.addService(ProfileService, {
-    Upsert: profileHandler.upsert,
+    upsert: profileHandler.upsert,
     view: profileHandler.getProfile,
+    health: profileHandler.health,
+    status: profileHandler.status,
+    livez: profileHandler.livez,
+    readyz: profileHandler.readyz,
 });
 
 export default server;
