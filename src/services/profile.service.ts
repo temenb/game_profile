@@ -1,13 +1,12 @@
 import { PrismaClient } from '@prisma/client';
-import { publishToExchange } from "../utils/ampq";
+import {publishToExchange, publishToQueue} from "../utils/ampq";
 import config from '../config/config';
 
 const prisma = new PrismaClient();
 
 export async function findProfile(ownerId: string) {
-    return prisma.profile.findUnique({ where: { ownerId } });
+    return prisma.profile.findFirst({ where: { ownerId } });
 }
-
 
 export async function upsertProfile(ownerId: string) {
 
@@ -25,8 +24,8 @@ export async function upsertProfile(ownerId: string) {
         update: { nickname },
     });
 
-    await publishToExchange(config.rabbitmqQueueProfileCreated!, {
-        profileId: profile.id,
+    await publishToQueue(config.rabbitmqQueueProfileCreated!, {
+        ownerId: profile.id,
     });
     return profile;
 }

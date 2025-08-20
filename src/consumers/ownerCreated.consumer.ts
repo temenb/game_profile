@@ -1,9 +1,11 @@
 import { getChannel, getConnection } from '../utils/ampq';
 import { upsertProfile } from '../services/profile.service'
+import { publishToQueue } from '../utils/ampq';
 import logger from "../utils/logger";
+import config from "../config/config";
 
 export async function createConsumer(event: string, queue: string) {
-    const channel = await getChannel(event);
+    const channel = await getChannel();
 
     await channel.assertExchange(event, 'fanout', { durable: true });
     await channel.assertQueue(queue, { durable: true });
@@ -17,9 +19,10 @@ export async function createConsumer(event: string, queue: string) {
             const data = JSON.parse(msg.content.toString());
             if (!data.ownerId) throw new Error('Missing ownerId');
 
-            await upsertProfile(data.ownerId);
+            const profile = await upsertProfile(data.ownerId);
             logger.log(`[${queue}] Processed ownerId=${data.ownerId}`);
             channel.ack(msg);
+
         } catch (err) {
             logger.error(`[${queue}] Error:`, err);
             channel.nack(msg, false, true); // включаем повторную доставку

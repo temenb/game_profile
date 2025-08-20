@@ -16,13 +16,13 @@ model Profile {
   rating     Int      @default(1000)
   experience Int      @default(0)
 
-  achievements UserAchievement[]
+  achievements OwnerAchievement[]
 
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
 
-model UserAchievement {
+model OwnerAchievement {
   id            String   @id @default(uuid())
   profileId     String
   achievementId String
@@ -41,7 +41,7 @@ model Achievement {
   title       String   @unique
   description String?
 
-  users       UserAchievement[]
+  Owners       OwnerAchievement[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
