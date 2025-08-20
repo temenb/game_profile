@@ -1,29 +1,36 @@
-import amqp from 'amqplib';
-import { PrismaClient } from '@prisma/client';
-import config from '../config/config';
-import getChannel from '../utils/ampq';
+import { getChannel, getConnection } from '../utils/ampq';
+import { upsertProfile } from '../services/profile.service'
+import logger from "../utils/logger";
 
-const prisma = new PrismaClient();
+export async function createConsumer(event: string, queue: string) {
+    const channel = await getChannel(event);
 
-export async function consumeUserCreated() {
-    const channel = await getChannel(config.rabbitmqQueueUserCreated);
+    await channel.assertExchange(event, 'fanout', { durable: true });
+    await channel.assertQueue(queue, { durable: true });
+    await channel.bindQueue(queue, event, '');
+    await channel.prefetch(5);
 
-    channel.consume('user.created', async (msg) => {
+    await channel.consume(queue, async (msg) => {
         if (!msg) return;
 
-        const data = JSON.parse(msg.content.toString());
-        await prisma.profile.create({
-            data: {
-                userId: data.userId,
-                nickname: generateGuestNickname(),
-            },
-        });
+        try {
+            const data = JSON.parse(msg.content.toString());
+            if (!data.ownerId) throw new Error('Missing ownerId');
 
-        channel.ack(msg);
+            await upsertProfile(data.ownerId);
+            logger.log(`[${queue}] Processed ownerId=${data.ownerId}`);
+            channel.ack(msg);
+        } catch (err) {
+            logger.error(`[${queue}] Error:`, err);
+            channel.nack(msg, false, true); // включаем повторную доставку
+        }
     });
-}
 
-function generateGuestNickname(): string {
-    const randomDigits = Math.floor(10000000 + Math.random() * 90000000);
-    return `Guest${randomDigits}`;
+    process.on('SIGINT', async () => {
+        console.log(`[!] Shutting down "${queue}" consumer...`);
+        await channel.close();
+        const connection = await getConnection();
+        connection.close();
+        process.exit(0);
+    });
 }

@@ -56,17 +56,17 @@ export const checkPostgres = async (): Promise<boolean> => {
 };
 
 export const checkRabbit = async (): Promise<boolean> => {
-  return true;
-  // try {
-  //   const conn = await amqp.connect(config.rabbitmqUrl);
-  //   const channel = await conn.createChannel();
-  //
-  //   await channel.assertQueue(config.rabbitmqQueueUserCreated, { durable: true });
-  //   await channel.close();
-  //   await conn.close();
-  //   return true;
-  // } catch (err) {
-  //   logger.error('❌ RabbitMQ health check failed:', err);
-  //   return false;
-  // }
+  try {
+    const conn = await amqp.connect(config.rabbitmqUrl);
+    const channel = await conn.createChannel();
+
+    await channel.assertExchange(config.rabbitmqExchangeUserCreated, 'fanout', { durable: true });
+
+    await channel.close();
+    await conn.close();
+    return true;
+  } catch (err) {
+    logger.error('❌ RabbitMQ health check failed:', err);
+    return false;
+  }
 };

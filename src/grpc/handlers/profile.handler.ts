@@ -7,19 +7,20 @@ export const callbackError = (callback: grpc.sendUnaryData<any>, err: unknown) =
     const message = err instanceof Error ? err.message : 'Unknown error';
     callback({ code: grpc.status.INTERNAL, message }, null);
 };
+
+
 export const upsert = async (
     call: grpc.ServerUnaryCall<ProfileGrpc.UpsertRequest, ProfileGrpc.ProfileResponse>,
     callback: grpc.sendUnaryData<ProfileGrpc.ProfileResponse>
 ) => {
-    const { userId } = call.request;
+    const { ownerId } = call.request;
 
     try {
-        const result = await ProfileService.upsert(userId);
-
+        const result = await ProfileService.upsertProfile(ownerId);
 
         callback(null, {
             profileId: result.id,
-            userId: result.userId,
+            ownerId: result.ownerId,
             nickname: result.nickname,
             level: result.level,
             rating: result.rating,
@@ -38,10 +39,10 @@ export const getProfile = async (
     call: grpc.ServerUnaryCall<ProfileGrpc.ViewRequest, ProfileGrpc.ProfileResponse>,
     callback: grpc.sendUnaryData<ProfileGrpc.ProfileResponse>
 ) => {
-    const { userId } = call.request;
+    const { ownerId } = call.request;
 
     try {
-        const result = await ProfileService.getProfile(userId);
+        const result = await ProfileService.getProfile(ownerId);
         
         if (!result) {
             throw new Error("Expected result, but got null");
@@ -49,7 +50,7 @@ export const getProfile = async (
 
         callback(null, {
             profileId: result.id,
-            userId: result.userId,
+            ownerId: result.ownerId,
             nickname: result.nickname,
             level: result.level,
             rating: result.rating,

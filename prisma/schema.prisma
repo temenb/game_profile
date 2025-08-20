@@ -10,7 +10,7 @@ datasource db {
 
 model Profile {
   id         String   @id @default(uuid())
-  getUserId     String   @unique
+  ownerId    String   @unique
   nickname   String   @default("guest")
   level      Int      @default(1)
   rating     Int      @default(1000)
