@@ -1,19 +1,29 @@
 import dotenv from 'dotenv';
-import { ProfileService } from './generated/profile';
+import {ProfileService} from './generated/profile';
 import * as grpc from '@grpc/grpc-js';
 import * as profileHandler from "./grpc/handlers/profile.handler";
+import { initKafka } from "./utils/kafka";
+import config from "./config/config";
+import initConsumers from "./utils/conumers";
 
 dotenv.config();
 
 const server = new grpc.Server();
 
 server.addService(ProfileService, {
-    upsert: profileHandler.upsert,
-    view: profileHandler.getProfile,
-    health: profileHandler.health,
-    status: profileHandler.status,
-    livez: profileHandler.livez,
-    readyz: profileHandler.readyz,
+  upsert: profileHandler.upsert,
+  view: profileHandler.getProfile,
+  health: profileHandler.health,
+  status: profileHandler.status,
+  livez: profileHandler.livez,
+  readyz: profileHandler.readyz,
 });
 
 export default server;
+
+async function kafka() {
+  await initKafka(config.kafkaClientId);
+  await initConsumers();
+}
+
+kafka();

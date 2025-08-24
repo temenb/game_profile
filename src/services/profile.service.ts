@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import {publishToExchange, publishToQueue} from "../utils/ampq";
 import config from '../config/config';
+import {broadcastEvent} from "../utils/kafka";
 
 const prisma = new PrismaClient();
 
@@ -20,13 +20,11 @@ export async function upsertProfile(ownerId: string) {
 
     const profile = await prisma.profile.upsert({
         where: { ownerId },
-        create: { ownerId },
+        create: { ownerId, nickname },
         update: { nickname },
     });
 
-    await publishToQueue(config.rabbitmqQueueProfileCreated!, {
-        ownerId: profile.id,
-    });
+    broadcastEvent(config.kafkaTopicProfileCreated, [{ value: JSON.stringify({ ownerId: profile.id }) }]);
     return profile;
 }
 
@@ -39,5 +37,6 @@ export async function getProfile(ownerId: string) {
 
 function generateGuestNickname(): string {
   const randomDigits = Math.floor(10000000 + Math.random() * 90000000);
+
   return `Guest${randomDigits}`;
 }
