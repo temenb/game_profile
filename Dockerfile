@@ -1,33 +1,31 @@
 FROM node:22
+ENV NODE_ENV=development
 
 WORKDIR /usr/src/app
 
-COPY --chown=node:node services/profile/package*.json ./
-COPY --chown=node:node services/profile/jest.config.js ./
-COPY --chown=node:node services/profile/tsconfig.json ./
-COPY --chown=node:node services/profile/src ./src
-COPY --chown=node:node services/profile/prisma ./prisma
-COPY --chown=node:node services/profile/__tests__ ./__tests__
+COPY shared/logger/ ./shared/logger/
+COPY turbo.json  ./
+COPY package.json ./
+COPY pnpm-workspace.yaml ./
+COPY services/profile/package*.json ./services/profile/
+COPY services/profile/jest.config.js ./services/profile/
+COPY services/profile/tsconfig.json ./services/profile/
+COPY services/profile/src ./services/profile/src/
+COPY services/profile/__tests__ ./services/profile/__tests__/
 
 USER root
+RUN chown -R node:node /usr/src/app
 
-RUN apt-get update && apt-get install -y netcat-openbsd
-
-RUN #npm install -g pnpm && pnpm install --frozen-lockfile
-RUN npm install -g pnpm && pnpm install
-
-RUN chown -R node:node /usr/src/app/node_modules\
-    && mkdir -p /usr/src/app/dist && chown -R node:node /usr/src/app/dist
+RUN corepack enable && pnpm install
 
 USER node
 
-RUN npx prisma generate
-
-RUN pnpm run build
+RUN pnpm --filter @shared/logger build
+RUN pnpm --filter profile build
 
 EXPOSE 3000
 
-CMD ["pnpm", "start"]
+CMD ["pnpm", "--filter", "profile", "start"]
 
 HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
-  CMD nc -z localhost 3000 || exit 1
+  CMD curl -f http://localhost:3000/health || exit 1
