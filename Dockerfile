@@ -11,12 +11,13 @@ COPY services/profile/package*.json ./services/profile/
 COPY services/profile/jest.config.js ./services/profile/
 COPY services/profile/tsconfig.json ./services/profile/
 COPY services/profile/src ./services/profile/src/
+COPY services/profile/prisma ./services/profile/prisma/
 COPY services/profile/__tests__ ./services/profile/__tests__/
 
 USER root
-RUN chown -R node:node /usr/src/app
 
 RUN corepack enable && pnpm install
+RUN chown -R node:node /usr/src/app
 
 USER node
 
