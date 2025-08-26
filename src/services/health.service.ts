@@ -1,4 +1,4 @@
-import logger from "../utils/logger";
+import logger from "@shared/logger";
 import prisma from '../utils/prisma';
 import { broadcastEvent } from "../utils/kafka";
 
