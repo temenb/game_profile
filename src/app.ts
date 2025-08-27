@@ -5,7 +5,7 @@ import * as profileHandler from "./grpc/handlers/profile.handler";
 import kafkaConfig, {createUserConsumerConfig} from "./config/kafka.config";
 import { createConsumer } from '@shared/kafka';
 import logger from '@shared/logger';
-import {userCreated} from "./utils/conumers";
+import {userCreated} from "./utils/consumers";
 
 dotenv.config();
 
