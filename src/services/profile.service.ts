@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 import config from '../config/config';
-import {broadcastEvent} from "../utils/kafka";
 
 const prisma = new PrismaClient();
 
@@ -24,7 +23,7 @@ export async function upsertProfile(ownerId: string) {
         update: { nickname },
     });
 
-    broadcastEvent(config.kafkaTopicProfileCreated, [{ value: JSON.stringify({ ownerId: profile.id }) }]);
+    // broadcastEvent(config.kafkaTopicProfileCreated, [{ value: JSON.stringify({ ownerId: profile.id }) }]);
     return profile;
 }
 

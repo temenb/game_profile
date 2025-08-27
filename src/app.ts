@@ -2,9 +2,6 @@ import dotenv from 'dotenv';
 import {ProfileService} from './generated/profile';
 import * as grpc from '@grpc/grpc-js';
 import * as profileHandler from "./grpc/handlers/profile.handler";
-import { initKafka } from "./utils/kafka";
-import config from "./config/config";
-import initConsumers from "./utils/conumers";
 
 dotenv.config();
 
@@ -20,10 +17,3 @@ server.addService(ProfileService, {
 });
 
 export default server;
-
-async function kafka() {
-  await initKafka(config.kafkaClientId);
-  await initConsumers();
-}
-
-kafka();
