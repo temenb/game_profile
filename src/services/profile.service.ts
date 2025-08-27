@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import config from '../config/config';
+import { createProducer } from '@shared/kafka';
+import kafkaConfig, { createProfileProducerConfig } from "../config/kafka.config";
 
 const prisma = new PrismaClient();
 
@@ -9,6 +10,7 @@ export async function findProfile(ownerId: string) {
 
 export async function upsertProfile(ownerId: string) {
 
+    console.log(ownerId);
     const existing = await prisma.profile.findUnique({ where: { ownerId } });
 
     if (existing) {
@@ -23,7 +25,9 @@ export async function upsertProfile(ownerId: string) {
         update: { nickname },
     });
 
-    // broadcastEvent(config.kafkaTopicProfileCreated, [{ value: JSON.stringify({ ownerId: profile.id }) }]);
+    const producer = await createProducer(kafkaConfig);
+    producer.send(createProfileProducerConfig, [{ value: JSON.stringify({ ownerId: profile.id }) }]);
+
     return profile;
 }
 
