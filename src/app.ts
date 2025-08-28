@@ -26,3 +26,4 @@ createConsumer(kafkaConfig, {
 });
 
 export default server;
+
