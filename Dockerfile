@@ -7,6 +7,7 @@ COPY shared/ ./shared/
 COPY turbo.json  ./
 COPY package.json ./
 COPY pnpm-workspace.yaml ./
+COPY tsconfig.json ./
 COPY services/profile/package*.json ./services/profile/
 COPY services/profile/jest.config.js ./services/profile/
 COPY services/profile/tsconfig.json ./services/profile/
