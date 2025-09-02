@@ -3,8 +3,7 @@ import {ProfileService} from './generated/profile';
 import * as grpc from '@grpc/grpc-js';
 import * as profileHandler from "./grpc/handlers/profile.handler";
 import kafkaConfig, {createUserConsumerConfig} from "./config/kafka.config";
-import { createConsumer } from '@shared/kafka';
-import logger from '@shared/logger';
+import {createConsumer} from '@shared/kafka';
 import {userCreated} from "./utils/consumers";
 
 dotenv.config();

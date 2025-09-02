@@ -1,40 +1,39 @@
-import { PrismaClient } from '@prisma/client';
-import { createProducer } from '@shared/kafka';
-import kafkaConfig, { createProfileProducerConfig } from "../config/kafka.config";
+import {PrismaClient} from '@prisma/client';
+import {createProducer} from '@shared/kafka';
+import kafkaConfig, {createProfileProducerConfig} from "../config/kafka.config";
 
 const prisma = new PrismaClient();
 
 export async function findProfile(ownerId: string) {
-    return prisma.profile.findFirst({ where: { ownerId } });
+  return prisma.profile.findFirst({where: {ownerId}});
 }
 
 export async function upsertProfile(ownerId: string) {
 
-    console.log(ownerId);
-    const existing = await prisma.profile.findUnique({ where: { ownerId } });
+  const existing = await prisma.profile.findUnique({where: {ownerId}});
 
-    if (existing) {
-        return existing;
-    }
+  if (existing) {
+    return existing;
+  }
 
-    const nickname = generateGuestNickname();
+  const nickname = generateGuestNickname();
 
-    const profile = await prisma.profile.upsert({
-        where: { ownerId },
-        create: { ownerId, nickname },
-        update: { nickname },
-    });
+  const profile = await prisma.profile.upsert({
+    where: {ownerId},
+    create: {ownerId, nickname},
+    update: {nickname},
+  });
 
-    const producer = await createProducer(kafkaConfig);
-    producer.send(createProfileProducerConfig, [{ value: JSON.stringify({ ownerId: profile.id }) }]);
+  const producer = await createProducer(kafkaConfig);
+  producer.send(createProfileProducerConfig, [{value: JSON.stringify({ownerId: profile.id})}]);
 
-    return profile;
+  return profile;
 }
 
 export async function getProfile(ownerId: string) {
-    return prisma.profile.findUnique({
-        where: { ownerId: ownerId },
-    });
+  return prisma.profile.findUnique({
+    where: {ownerId: ownerId},
+  });
 }
 
 
