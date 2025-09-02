@@ -1,5 +1,7 @@
 import * as grpc from '@grpc/grpc-js';
 import * as ProfileGrpc from '../../generated/profile';
+import * as HealthGrpc from '../../generated//common/health';
+import * as EmptyGrpc from '../../generated//common/empty';
 import * as ProfileService from '../../services/profile.service';
 import * as heathService from '../../services/health.service';
 
@@ -7,7 +9,6 @@ export const callbackError = (callback: grpc.sendUnaryData<any>, err: unknown) =
     const message = err instanceof Error ? err.message : 'Unknown error';
     callback({ code: grpc.status.INTERNAL, message }, null);
 };
-
 
 export const upsert = async (
     call: grpc.ServerUnaryCall<ProfileGrpc.UpsertRequest, ProfileGrpc.ProfileResponse>,
@@ -66,8 +67,8 @@ export const getProfile = async (
 };
 
 export const health = async (
-  call: grpc.ServerUnaryCall<ProfileGrpc.Empty, ProfileGrpc.HealthReport>,
-  callback: grpc.sendUnaryData<ProfileGrpc.HealthReport>
+  call: grpc.ServerUnaryCall<EmptyGrpc.Empty, HealthGrpc.HealthReport>,
+  callback: grpc.sendUnaryData<HealthGrpc.HealthReport>
 ) => {
     try {
         const response = await heathService.health();
@@ -80,8 +81,8 @@ export const health = async (
 };
 
 export const status = async (
-  call: grpc.ServerUnaryCall<ProfileGrpc.Empty, ProfileGrpc.StatusInfo>,
-  callback: grpc.sendUnaryData<ProfileGrpc.StatusInfo>
+  call: grpc.ServerUnaryCall<EmptyGrpc.Empty, HealthGrpc.StatusInfo>,
+  callback: grpc.sendUnaryData<HealthGrpc.StatusInfo>
 ) => {
     try {
         const response = await heathService.status();
@@ -94,8 +95,8 @@ export const status = async (
 };
 
 export const livez = async (
-  call: grpc.ServerUnaryCall<ProfileGrpc.Empty, ProfileGrpc.LiveStatus>,
-  callback: grpc.sendUnaryData<ProfileGrpc.LiveStatus>
+  call: grpc.ServerUnaryCall<EmptyGrpc.Empty, HealthGrpc.LiveStatus>,
+  callback: grpc.sendUnaryData<HealthGrpc.LiveStatus>
 ) => {
     try {
         const response = await heathService.livez();
@@ -108,8 +109,8 @@ export const livez = async (
 };
 
 export const readyz = async (
-  call: grpc.ServerUnaryCall<ProfileGrpc.Empty, ProfileGrpc.ReadyStatus>,
-  callback: grpc.sendUnaryData<ProfileGrpc.ReadyStatus>
+  call: grpc.ServerUnaryCall<EmptyGrpc.Empty, HealthGrpc.ReadyStatus>,
+  callback: grpc.sendUnaryData<HealthGrpc.ReadyStatus>
 ) => {
     try {
         const response = await heathService.readyz();
