@@ -13,7 +13,13 @@ export async function seedProfiles() {
     }))
   );
 
-  await prisma.profile.createMany({data: profiles});
+  // Создаём профили только если их ещё нет
+  for (const profile of profiles) {
+    const exists = await prisma.profile.findUnique({ where: { id: profile.id } });
+    if (!exists) {
+      await prisma.profile.create({ data: profile });
+    }
+  }
 
   logger.log('👤 Profiles are created');
 }
