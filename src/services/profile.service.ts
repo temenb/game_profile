@@ -1,8 +1,6 @@
-import {PrismaClient} from '@prisma/client';
+import {prisma} from '../utils/prisma';
 import {createProducer} from '@shared/kafka';
 import kafkaConfig, {createProfileProducerConfig} from "../config/kafka.config";
-
-const prisma = new PrismaClient();
 
 export async function findProfile(ownerId: string) {
   return prisma.profile.findFirst({where: {ownerId}});

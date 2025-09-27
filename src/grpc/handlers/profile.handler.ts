@@ -1,18 +1,11 @@
 import * as grpc from '@grpc/grpc-js';
-import * as ProfileGrpc from '../../generated/profile';
-import * as HealthGrpc from '../../generated/common/health';
-import * as EmptyGrpc from '../../generated/common/empty';
+import * as ProfileGrpc from '../generated/profile';
 import * as ProfileService from '../../services/profile.service';
-import * as heathService from '../../services/health.service';
-
-export const callbackError = (callback: grpc.sendUnaryData<any>, err: unknown) => {
-  const message = err instanceof Error ? err.message : 'Unknown error';
-  callback({code: grpc.status.INTERNAL, message}, null);
-};
+import {callbackError} from './callback.error';
 
 export const upsert = async (
-  call: grpc.ServerUnaryCall<ProfileGrpc.UpsertRequest, ProfileGrpc.ProfileResponse>,
-  callback: grpc.sendUnaryData<ProfileGrpc.ProfileResponse>
+  call: grpc.ServerUnaryCall<ProfileGrpc.UpsertRequest, ProfileGrpc.ProfileObject>,
+  callback: grpc.sendUnaryData<ProfileGrpc.ProfileObject>
 ) => {
   const {ownerId} = call.request;
 
@@ -20,7 +13,7 @@ export const upsert = async (
     const result = await ProfileService.upsertProfile(ownerId);
 
     callback(null, {
-      profileId: result.id,
+      id: result.id,
       ownerId: result.ownerId,
       nickname: result.nickname,
       level: result.level,
@@ -37,20 +30,20 @@ export const upsert = async (
 };
 
 export const getProfile = async (
-  call: grpc.ServerUnaryCall<ProfileGrpc.ViewRequest, ProfileGrpc.ProfileResponse>,
-  callback: grpc.sendUnaryData<ProfileGrpc.ProfileResponse>
+  call: grpc.ServerUnaryCall<ProfileGrpc.ViewRequest, ProfileGrpc.ProfileObject>,
+  callback: grpc.sendUnaryData<ProfileGrpc.ProfileObject>
 ) => {
-  const {ownerId} = call.request;
+  const {id} = call.request;
 
   try {
-    const result = await ProfileService.getProfile(ownerId);
+    const result = await ProfileService.getProfile(id);
 
     if (!result) {
       throw new Error("Expected result, but got null");
     }
 
     callback(null, {
-      profileId: result.id,
+      id: result.id,
       ownerId: result.ownerId,
       nickname: result.nickname,
       level: result.level,
@@ -63,61 +56,5 @@ export const getProfile = async (
       code: grpc.status.INTERNAL,
       message: err.message,
     }, null);
-  }
-};
-
-export const health = async (
-  call: grpc.ServerUnaryCall<EmptyGrpc.Empty, HealthGrpc.HealthReport>,
-  callback: grpc.sendUnaryData<HealthGrpc.HealthReport>
-) => {
-  try {
-    const response = await heathService.health();
-
-    callback(null, response);
-
-  } catch (err: any) {
-    callbackError(callback, err);
-  }
-};
-
-export const status = async (
-  call: grpc.ServerUnaryCall<EmptyGrpc.Empty, HealthGrpc.StatusInfo>,
-  callback: grpc.sendUnaryData<HealthGrpc.StatusInfo>
-) => {
-  try {
-    const response = await heathService.status();
-
-    callback(null, response);
-
-  } catch (err: any) {
-    callbackError(callback, err);
-  }
-};
-
-export const livez = async (
-  call: grpc.ServerUnaryCall<EmptyGrpc.Empty, HealthGrpc.LiveStatus>,
-  callback: grpc.sendUnaryData<HealthGrpc.LiveStatus>
-) => {
-  try {
-    const response = await heathService.livez();
-
-    callback(null, response);
-
-  } catch (err: any) {
-    callbackError(callback, err);
-  }
-};
-
-export const readyz = async (
-  call: grpc.ServerUnaryCall<EmptyGrpc.Empty, HealthGrpc.ReadyStatus>,
-  callback: grpc.sendUnaryData<HealthGrpc.ReadyStatus>
-) => {
-  try {
-    const response = await heathService.readyz();
-
-    callback(null, response);
-
-  } catch (err: any) {
-    callbackError(callback, err);
   }
 };
