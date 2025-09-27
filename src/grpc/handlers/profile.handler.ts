@@ -1,7 +1,7 @@
 import * as grpc from '@grpc/grpc-js';
 import * as ProfileGrpc from '../../generated/profile';
-import * as HealthGrpc from '../../generated//common/health';
-import * as EmptyGrpc from '../../generated//common/empty';
+import * as HealthGrpc from '../../generated/common/health';
+import * as EmptyGrpc from '../../generated/common/empty';
 import * as ProfileService from '../../services/profile.service';
 import * as heathService from '../../services/health.service';
 
